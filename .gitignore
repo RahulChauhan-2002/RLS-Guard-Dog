@@ -1,0 +1,117 @@
+# Created by Gemini - A comprehensive .gitignore for MERN stack projects
+# This file tells Git which files and directories to intentionally ignore.
+
+# ----------------------------------------------------------------
+# --- General & System Files ---
+# ----------------------------------------------------------------
+
+# Operating System generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor configuration files
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+*.sublime-project
+*.sublime-workspace
+
+# ----------------------------------------------------------------
+# --- Dependencies & Runtime Data ---
+# ----------------------------------------------------------------
+
+# Node.js dependencies for both frontend and backend
+# These can be reinstalled from package.json
+**/node_modules/
+/node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ----------------------------------------------------------------
+# --- Environment Variables ---
+# ----------------------------------------------------------------
+
+# Environment variables are secret and machine-specific.
+# They should NEVER be committed to version control.
+.env
+.env.*
+!.env.example
+!.env.template
+
+# ----------------------------------------------------------------
+# --- Backend (Node.js / Express) Specific ---
+# ----------------------------------------------------------------
+
+# Compiled files (e.g., if using TypeScript for the backend)
+/dist/
+/build/
+
+# Uploaded files or temporary directories
+/uploads/
+
+# ----------------------------------------------------------------
+# --- Frontend (React / Vite / Create React App) Specific ---
+# ----------------------------------------------------------------
+
+# Build output directory
+/client/build
+/client/dist
+/build
+/dist
+
+# Local development cache (for tools like Vite)
+.vite
+.next
+
+# Create React App specific files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ----------------------------------------------------------------
+# --- Testing ---
+# ----------------------------------------------------------------
+
+# Test reports and coverage analysis
+/coverage/
+/jest-coverage/
+.nyc_output
+.eslintcache
+
+# Cypress e2e testing files
+/cypress/videos/
+/cypress/screenshots/
+
+# Playwright test reports
+/test-results/
+/playwright-report/
+
+# ----------------------------------------------------------------
+# --- Miscellaneous ---
+# ----------------------------------------------------------------
+
+# Optional webpack records
+webpack.records.json
+
+# Optional directory for build reports
+.build-reports/
