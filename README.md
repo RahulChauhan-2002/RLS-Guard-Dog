@@ -201,5 +201,6 @@ MIT
 
 ## Credits
 
-Made by [Rahul Chauhan](https://github.com/RahulChauhan-2002)  
+Made by [Rahul Chauhan](https://github.com/RahulChauhan-2002)   
 Powered by Supabase, MongoDB, Node.js, React, and TailwindCSS.
+
