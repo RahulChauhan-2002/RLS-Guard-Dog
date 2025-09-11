@@ -17,6 +17,9 @@ const app = express();
 // Configure CORS for specific origins
 const corsOptions = {
   origin: process.env.clientUrl, 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
