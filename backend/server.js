@@ -1,63 +1,87 @@
+// ============== server.js ==============
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Local modules
-const connectDB = require('./src/config/db');
-
-// Route imports
+// Import routes
 const authRoutes = require('./src/routes/auth');
 const progressRoutes = require('./src/routes/progress');
 const classroomRoutes = require('./src/routes/classroom');
 
 const app = express();
 
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Configure CORS for specific origins
-const corsOptions = {
-  origin: process.env.clientUrl, 
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+// Database connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rls_guard_dog');
+    console.log('✅ MongoDB connected');
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error);
+    process.exit(1);
+  }
 };
-app.use(cors(corsOptions));
 
-// Built-in middleware for json
-app.use(express.json({ limit: '10kb' })); // Limit request body size
-
-// API Rate Limiting to prevent brute-force attacks
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again after 15 minutes',
-});
-app.use('/api', limiter); 
-
-
-// API Routes ---
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/classroom', classroomRoutes);
 
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK',
+    message: 'Server is running'
+  });
+});
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    success: false,
+    message: 'Route not found' 
+  });
+});
 
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Something went wrong!',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
 
-// Server Startup ---
+// Start server
+const PORT = process.env.PORT || 5000;
+
 const startServer = async () => {
   try {
     await connectDB();
-    console.log('MongoDB connected successfully.');
-
-    console.log(`server running on port no. ${process.env.PORT}`)
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   } catch (error) {
-    console.error('Failed to connect to MongoDB', error);
-    process.exit(1); 
+    console.error('Failed to start server:', error);
+    process.exit(1);
   }
 };
 
 startServer();
 
-module.exports = app;
+// Handle shutdown gracefully
+process.on('SIGINT', async () => {
+  console.log('\n👋 Shutting down gracefully...');
+  await mongoose.connection.close();
+  process.exit(0);
+});

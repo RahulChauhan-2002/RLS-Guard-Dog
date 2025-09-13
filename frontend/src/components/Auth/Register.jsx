@@ -1,3 +1,4 @@
+// ============== src/components/Auth/Register.jsx (FIXED) ==============
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
@@ -6,7 +7,7 @@ import { register, clearError } from '../../redux/slices/authSlice';
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector(state => state.auth);
+  const { loading, error, isAuthenticated } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -19,21 +20,32 @@ const Register = () => {
   const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
+    // Navigate if already authenticated
+    if (isAuthenticated) {
+      navigate('/');
+    }
+    
+    // Clear errors on unmount
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear validation error when user types
+    if (validationError) {
+      setValidationError('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Client-side validation
     if (formData.password !== formData.confirmPassword) {
       setValidationError('Passwords do not match');
       return;
@@ -46,11 +58,18 @@ const Register = () => {
 
     setValidationError('');
     
+    // Remove confirmPassword before sending to backend
     const { confirmPassword, ...registerData } = formData;
-    const result = await dispatch(register(registerData));
     
-    if (register.fulfilled.match(result)) {
-      navigate('/');
+    try {
+      const result = await dispatch(register(registerData)).unwrap();
+      // If successful, navigate to dashboard
+      if (result.token) {
+        navigate('/');
+      }
+    } catch (err) {
+      // Error is handled by Redux
+      console.error('Registration failed:', err);
     }
   };
 
@@ -75,8 +94,9 @@ const Register = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full px-3 py-2 border rounded"
               required
+              disabled={loading}
             />
           </div>
 
@@ -89,8 +109,9 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full px-3 py-2 border rounded"
               required
+              disabled={loading}
             />
           </div>
 
@@ -103,8 +124,10 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full px-3 py-2 border rounded"
               required
+              disabled={loading}
+              minLength="6"
             />
           </div>
 
@@ -117,8 +140,10 @@ const Register = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full px-3 py-2 border rounded"
               required
+              disabled={loading}
+              minLength="6"
             />
           </div>
 
@@ -130,7 +155,8 @@ const Register = () => {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full px-3 py-2 border rounded"
+              disabled={loading}
             >
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
@@ -140,7 +166,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full"
+            className="btn-primary w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
